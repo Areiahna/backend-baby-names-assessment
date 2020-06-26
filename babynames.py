@@ -6,6 +6,11 @@
 # Copyright 2010 Google Inc.
 # Licensed under the Apache License, Version 2.0
 # http://www.apache.org/licenses/LICENSE-2.0
+__author__ = "Areiahna Cooks & Coach David R & Demo"
+
+import argparse
+import re
+import sys
 
 """
 Define the extract_names() function below and change main()
@@ -31,9 +36,8 @@ Suggested milestones for incremental development:
  - Fix main() to use the extracted_names list
 """
 
-import sys
-import re
-import argparse
+PATTERN = r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>'
+YEAR = r'Popularity in (\d\d\d\d)'
 
 
 def extract_names(filename):
@@ -43,8 +47,27 @@ def extract_names(filename):
     the name-rank strings in alphabetical order.
     ['2006', 'Aaliyah 91', 'Aaron 57', 'Abagail 895', ...]
     """
-    names = []
-    # +++your code here+++
+
+    with open(filename, 'r') as f:
+        names = []
+        baby_names = f.read()
+        year_match = re.search(YEAR, baby_names)
+        year = year_match.group(1)
+        names.append(year)
+        matches = re.findall(PATTERN, baby_names)
+
+        names_to_rank = {}
+        for rank_tuple in matches:
+            rank, boy_name, girl_name = rank_tuple
+            if boy_name not in names_to_rank:
+                names_to_rank[boy_name] = rank
+            if girl_name not in names_to_rank:
+                names_to_rank[girl_name] = rank
+
+    ranked_names = sorted(names_to_rank.items())
+    # print(ranked_names)
+    for name, rank in ranked_names:
+        names.append(f"{name} {rank} ")
     return names
 
 
@@ -76,13 +99,21 @@ def main(args):
 
     # option flag
     create_summary = ns.summaryfile
-
+    # print(extract_names(file_list))
     # For each filename, call `extract_names()` with that single file.
     # Format the resulting list as a vertical list (separated by newline \n).
     # Use the create_summary flag to decide whether to print the list
     # or to write the list to a summary file (e.g. `baby1990.html.summary`).
 
     # +++your code here+++
+    for filename in file_list:
+        names = extract_names(filename)
+        text = '\n'.join(names)
+        if create_summary:
+            with open(filename + '.summary', 'w') as f:
+                f.write(text)
+        else:
+            print(text)
 
 
 if __name__ == '__main__':
